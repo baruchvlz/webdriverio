@@ -1,4 +1,5 @@
 import SauceService from '../src'
+import got from 'got'
 
 global.browser = {
     config: { },
@@ -12,6 +13,8 @@ global.browser = {
 jest.mock('request', () => ({
     put: jest.fn().mockImplementation((url, opts, cb) => cb(null, {}, { message: 'success' }))
 }))
+
+jest.mock('got', () => jest.fn())
 
 test('getSauceRestUrl', () => {
     const service = new SauceService({ user: 'foobar' })
@@ -286,30 +289,32 @@ test('updateJob for RDC', () => {
     expect(service.updateRdcJob).toBeCalled()
 })
 
-test('updateVmJob', () => {
-    const request = require('request')
+test('updateVmJob', async () => {
+    got.mockImplementation(() => Promise.resolve({ body: { test: 'foo' } }))
     const service = new SauceService({ user: 'foobar', key: '123' })
     service.before({})
 
     service.failures = 123
     service.getBody = jest.fn()
 
-    service.updateVmJob('12345', 23, true)
+    await service.updateVmJob('12345', 23, true)
+
     expect(service.getBody).toBeCalled()
     expect(service.failures).toBe(0)
-    expect(request.put).toBeCalled()
+    expect(global.browser.jobData).toMatchObject({ test: 'foo' })
 })
 
-test('updateRdcJob', () => {
-    const request = require('request')
+test('updateRdcJob', async () => {
+    got.mockImplementation(() => Promise.resolve({ body: { test: 'foo' } }))
     const service = new SauceService({ })
     service.before({ testobject_api_key: 1})
 
     service.failures = 123
 
-    service.updateRdcJob('12345', 23)
+    await service.updateRdcJob('12345', 23)
+
     expect(service.failures).toBe(0)
-    expect(request.put).toBeCalled()
+    expect(global.browser.jobData).toMatchObject({ test: 'foo' })
 })
 
 test('getBody', () => {

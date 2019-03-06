@@ -1,4 +1,4 @@
-import request from 'request'
+import got from 'got'
 import logger from '@wdio/logger'
 import { getSauceEndpoint } from '@wdio/config'
 
@@ -164,37 +164,31 @@ export default class SauceService {
     }
 
     updateRdcJob (sessionId, failures) {
-        return new Promise((resolve, reject) => request.put(this.getSauceRestUrl(sessionId), {
-            json: true,
-            body: { 'passed': failures === 0 },
-        }, (e, res, body) => {
-            /* istanbul ignore if */
-            if (e) {
-                return reject(e)
-            }
-            global.browser.jobData = body
-            this.failures = 0
-            return resolve(body)
-        }))
+        return got(this.getSauceRestUrl(sessionId), { body: { passed: failures === 0 }, json: true })
+            .then((response) => {
+                global.browser.jobData = response.body
+                this.failures = 0
+
+                return response.body
+            })
     }
 
     updateVmJob (sessionId, failures, calledOnReload = false, browserName) {
-        return new Promise((resolve, reject) => request.put(this.getSauceRestUrl(sessionId), {
+        const authStr = this.auth ? `${this.sauceUser}:${this.sauceKey}` : ''
+
+        return got(this.getSauceRestUrl(sessionId), {
             json: true,
-            auth: {
-                user: this.sauceUser,
-                pass: this.sauceKey
+            headers: {
+                authorization: `Basic ${Buffer.from(authStr).toString('base64')}`
             },
             body: this.getBody(failures, calledOnReload, browserName)
-        }, (e, res, body) => {
-            /* istanbul ignore if */
-            if (e) {
-                return reject(e)
-            }
-            global.browser.jobData = body
-            this.failures = 0
-            return resolve(body)
-        }))
+        })
+            .then((response) => {
+                global.browser.jobData = response.body
+                this.failures = 0
+
+                return response.body
+            })
     }
 
     /**
