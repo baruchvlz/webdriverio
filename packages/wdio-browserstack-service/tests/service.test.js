@@ -1,8 +1,8 @@
 import BrowserstackService from '../src/service'
 import logger from '@wdio/logger'
-import fetch from 'node-fetch'
+import got from 'got'
 
-jest.mock('node-fetch', () => jest.fn())
+jest.mock('got', () => jest.fn())
 
 const log = logger('test')
 let service
@@ -35,12 +35,12 @@ describe('onReload()', () => {
             }
         }
 
-        fetch.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
+        got.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
     })
 
     it('should update and get session', async () => {
         await service.onReload(1, 2)
-        expect(fetch).toHaveBeenCalledTimes(2)
+        expect(got).toHaveBeenCalledTimes(2)
     })
 
     it('should reset failures', async () => {
@@ -62,7 +62,7 @@ describe('_printSessionURL', () => {
             }
         }
 
-        fetch.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
+        got.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
     })
     it('should get and log session details', async () => {
         const logInfoSpy = jest.spyOn(log, 'info').mockImplementation((string) => string)
@@ -75,7 +75,7 @@ describe('_printSessionURL', () => {
     })
 
     it('should throw an error if it recieves a non 200 status code', () => {
-        fetch.mockImplementation((data) => Promise.resolve({ status: 404, json: () => data }))
+        got.mockImplementation((data) => Promise.resolve({ status: 404, json: () => data }))
 
         service._printSessionURL()
             .catch(err => expect(err).toEqual(Error('Bad response code: Expected (200), Received (404)!')))
@@ -92,7 +92,7 @@ describe('before', () => {
             }
         }
 
-        fetch.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
+        got.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
     })
 
     it('should set auth to default values if not provided', () => {

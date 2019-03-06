@@ -1,5 +1,5 @@
 import logger from '@wdio/logger'
-import fetch from 'node-fetch'
+import got from 'got'
 
 import { BROWSER_DESCRIPTION } from './constants'
 
@@ -17,7 +17,7 @@ export default class BrowserstackService {
             user: this.config.user || 'NotSetUser',
             pass: this.config.key || 'NotSetKey'
         }
-        // this.auth = `${this.config.user || 'NotSetUser'}:${this.auth.pass}`
+
         return this._printSessionURL()
     }
 
@@ -66,7 +66,7 @@ export default class BrowserstackService {
     _update(sessionId, requestBody) {
         const authStr = this.auth ? `${this.auth.user}:${this.auth.pass}` : ''
 
-        return fetch(`https://api.browserstack.com/automate/sessions/${sessionId}.json`, {
+        return got(`https://api.browserstack.com/automate/sessions/${sessionId}.json`, {
             method: 'PUT',
             body: JSON.stringify(requestBody),
             headers: {
@@ -86,7 +86,7 @@ export default class BrowserstackService {
         const capabilities = global.browser.capabilities
         const authStr = this.auth ? `${this.auth.user}:${this.auth.pass}` : ''
 
-        return fetch(`https://api.browserstack.com/automate/sessions/${this.sessionId}.json`, {
+        return got(`https://api.browserstack.com/automate/sessions/${this.sessionId}.json`, {
             headers: {
                 authorization: `Basic ${Buffer.from(authStr).toString('base64')}`
             }
