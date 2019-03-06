@@ -1,11 +1,8 @@
 import BrowserstackService from '../src/service'
-import request from 'request'
 import logger from '@wdio/logger'
+import fetch from 'node-fetch'
 
-jest.mock('request', () => ({
-    put: jest.fn(),
-    get: jest.fn()
-}))
+jest.mock('node-fetch', () => jest.fn())
 
 const log = logger('test')
 let service
@@ -31,25 +28,19 @@ it('should initialize correctly', () => {
 
 describe('onReload()', () => {
     beforeAll(() => {
-        request.get.mockImplementation((url, opts, cb) => cb(
-            null,
-            { statusCode: 200 },
-            {
-                automation_session: {
-                    browser_url:
-                        'https://www.browserstack.com/automate/builds/1/sessions/2'
-                }
+        const data = {
+            automation_session: {
+                browser_url:
+                    'https://www.browserstack.com/automate/builds/1/sessions/2'
             }
-        ))
-        request.put.mockImplementation((url, opts, cb) => {
-            cb(null, {statusCode: 200}, {})
-        })
+        }
+
+        fetch.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
     })
 
     it('should update and get session', async () => {
         await service.onReload(1, 2)
-        expect(request.put).toHaveBeenCalled()
-        expect(request.get).toHaveBeenCalled()
+        expect(fetch).toHaveBeenCalledTimes(2)
     })
 
     it('should reset failures', async () => {
@@ -64,25 +55,14 @@ describe('onReload()', () => {
 
 describe('_printSessionURL', () => {
     beforeAll(() => {
-        request.get.mockImplementation((url, opts, cb) => cb(
-            null,
-            { statusCode: 200 },
-            {
-                automation_session: {
-                    name: 'Smoke Test',
-                    duration: 65,
-                    os: 'OS X',
-                    os_version: 'Sierra',
-                    browser_version: '61.0',
-                    browser: 'chrome',
-                    device: null,
-                    status: 'failed',
-                    reason: 'CLIENT_STOPPED_SESSION',
-                    browser_url:
-                        'https://www.browserstack.com/automate/builds/1/sessions/2'
-                }
+        const data = {
+            automation_session: {
+                browser_url:
+                    'https://www.browserstack.com/automate/builds/1/sessions/2'
             }
-        ))
+        }
+
+        fetch.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
     })
     it('should get and log session details', async () => {
         const logInfoSpy = jest.spyOn(log, 'info').mockImplementation((string) => string)
@@ -95,22 +75,24 @@ describe('_printSessionURL', () => {
     })
 
     it('should throw an error if it recieves a non 200 status code', () => {
-        request.get.mockImplementationOnce((url, opts, cb) => cb(null,{statusCode: 404}, {}))
+        fetch.mockImplementation((data) => Promise.resolve({ status: 404, json: () => data }))
 
-        expect(service._printSessionURL())
-            .rejects.toThrow(Error('Bad response code: Expected (200), Received (404)!'))
-    })
-
-    it('should reject and throw an error if request receives an error', () => {
-        const e = new Error('I\'m an error!')
-        request.get.mockImplementationOnce((url, opts, cb) => cb(e, {}, {}))
-        expect(service._printSessionURL()).rejects.toThrow(e)
+        service._printSessionURL()
+            .catch(err => expect(err).toEqual(Error('Bad response code: Expected (200), Received (404)!')))
     })
 })
 
 describe('before', () => {
     beforeAll(() => {
         global.browser.sessionId = 12
+        const data = {
+            automation_session: {
+                browser_url:
+                    'https://www.browserstack.com/automate/builds/1/sessions/2'
+            }
+        }
+
+        fetch.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
     })
 
     it('should set auth to default values if not provided', () => {
