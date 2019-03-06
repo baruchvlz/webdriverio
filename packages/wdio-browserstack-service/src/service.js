@@ -68,12 +68,13 @@ export default class BrowserstackService {
 
         return got(`https://api.browserstack.com/automate/sessions/${sessionId}.json`, {
             method: 'PUT',
-            body: JSON.stringify(requestBody),
+            body: requestBody,
+            json: true,
             headers: {
                 authorization: `Basic ${Buffer.from(authStr).toString('base64')}`
             }
         })
-            .then(res => res.json())
+            .then(res => res.body)
     }
 
     _getBody() {
@@ -87,6 +88,7 @@ export default class BrowserstackService {
         const authStr = this.auth ? `${this.auth.user}:${this.auth.pass}` : ''
 
         return got(`https://api.browserstack.com/automate/sessions/${this.sessionId}.json`, {
+            json: true,
             headers: {
                 authorization: `Basic ${Buffer.from(authStr).toString('base64')}`
             }
@@ -95,18 +97,18 @@ export default class BrowserstackService {
                 if (res.status !== 200) {
                     return Promise.reject(new Error(`Bad response code: Expected (200), Received (${res.status})!`))
                 }
-                return res.json()
+                return res.body
             })
-            .then((json) => {
+            .then((body) => {
                 const browserString = BROWSER_DESCRIPTION
                     .map(k => capabilities[k])
                     .filter(v => !!v)
                     .join(' ')
 
 
-                log.info(`${browserString} session: ${json.automation_session.browser_url}`)
+                log.info(`${browserString} session: ${body.automation_session.browser_url}`)
 
-                return json
+                return body
             })
     }
 }

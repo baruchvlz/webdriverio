@@ -35,7 +35,7 @@ describe('onReload()', () => {
             }
         }
 
-        got.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
+        got.mockImplementation(() => Promise.resolve({ status: 200, body: data }))
     })
 
     it('should update and get session', async () => {
@@ -62,7 +62,7 @@ describe('_printSessionURL', () => {
             }
         }
 
-        got.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
+        got.mockImplementation(() => Promise.resolve({ status: 200, body: data }))
     })
     it('should get and log session details', async () => {
         const logInfoSpy = jest.spyOn(log, 'info').mockImplementation((string) => string)
@@ -75,7 +75,7 @@ describe('_printSessionURL', () => {
     })
 
     it('should throw an error if it recieves a non 200 status code', () => {
-        got.mockImplementation((data) => Promise.resolve({ status: 404, json: () => data }))
+        got.mockImplementation((data) => Promise.resolve({ status: 404, body: data }))
 
         service._printSessionURL()
             .catch(err => expect(err).toEqual(Error('Bad response code: Expected (200), Received (404)!')))
@@ -92,7 +92,7 @@ describe('before', () => {
             }
         }
 
-        got.mockImplementation(() => Promise.resolve({ status: 200, json: () => data }))
+        got.mockImplementation(() => Promise.resolve({ status: 200, body: data }))
     })
 
     it('should set auth to default values if not provided', () => {
