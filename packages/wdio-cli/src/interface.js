@@ -351,6 +351,7 @@ export default class WDIOCLInterface extends EventEmitter {
     }
 
     finalise () {
+        logUpdate.done()
         this.clearConsole()
         this.printStdout()
         this.printReporters()

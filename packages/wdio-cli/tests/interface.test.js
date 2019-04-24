@@ -316,6 +316,7 @@ describe('cli interface', () => {
     })
 
     it('has finalise to create a final display', () => {
+        logUpdate.done = jest.fn()
         wdioClInterface.clearAll = jest.fn()
         wdioClInterface.printReporters = jest.fn()
         wdioClInterface.printStdout = jest.fn()
@@ -327,5 +328,6 @@ describe('cli interface', () => {
         expect(wdioClInterface.printStdout).toBeCalledTimes(1)
         expect(wdioClInterface.printSummary).toBeCalledTimes(1)
         expect(wdioClInterface.updateClock).toBeCalledTimes(1)
+        expect(logUpdate.done).toBeCalledTimes(1)
     })
 })
