@@ -1,9 +1,8 @@
-import url from 'url'
 import http from 'http'
 import path from 'path'
 import https from 'https'
 import merge from 'lodash.merge'
-import request from 'request'
+import axios from 'axios'
 import EventEmitter from 'events'
 
 import logger from '@wdio/logger'
@@ -13,8 +12,8 @@ import pkg from '../package.json'
 
 const log = logger('webdriver')
 const agents = {
-    http: new http.Agent({ keepAlive: true }),
-    https: new https.Agent({ keepAlive: true })
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
 }
 
 export default class WebDriverRequest extends EventEmitter {
@@ -27,7 +26,7 @@ export default class WebDriverRequest extends EventEmitter {
         this.defaultOptions = {
             method,
             followAllRedirects: true,
-            json: true,
+            responseType: 'json',
             headers: {
                 'Connection': 'keep-alive',
                 'Accept': 'application/json',
@@ -44,7 +43,7 @@ export default class WebDriverRequest extends EventEmitter {
 
     _createOptions (options, sessionId) {
         const requestOptions = {
-            agent: options.agent || agents[options.protocol],
+            agent: options.agent || agents[`${options.protocol}Agent`],
             headers: typeof options.headers === 'object' ? options.headers : {},
             qs: typeof options.queryParams === 'object' ? options.queryParams : {}
         }
@@ -53,9 +52,9 @@ export default class WebDriverRequest extends EventEmitter {
          * only apply body property if existing
          */
         if (this.body && (Object.keys(this.body).length || this.method === 'POST')) {
-            requestOptions.body = this.body
+            requestOptions.data = this.body
             requestOptions.headers = merge({}, requestOptions.headers, {
-                'Content-Length': Buffer.byteLength(JSON.stringify(requestOptions.body), 'UTF-8')
+                'Content-Length': Buffer.byteLength(JSON.stringify(requestOptions.data), 'UTF-8')
             })
         }
 
@@ -68,19 +67,16 @@ export default class WebDriverRequest extends EventEmitter {
             throw new Error('A sessionId is required for this command')
         }
 
-        requestOptions.uri = url.parse(
-            `${options.protocol}://` +
-            `${options.hostname}:${options.port}` +
+        requestOptions.url = `${options.protocol}://${options.hostname}:${options.port}` +
             path.join(options.path, this.endpoint.replace(':sessionId', sessionId))
-        )
 
         /**
          * send authentication credentials only when creating new session
          */
         if (this.endpoint === '/session' && options.user && options.key) {
             requestOptions.auth = {
-                user: options.user,
-                pass: options.key
+                username: options.user,
+                password: options.key
             }
         }
 
@@ -92,49 +88,44 @@ export default class WebDriverRequest extends EventEmitter {
         return requestOptions
     }
 
-    _request (fullRequestOptions, totalRetryCount = 0, retryCount = 0) {
-        log.info(`[${fullRequestOptions.method}] ${fullRequestOptions.uri.href}`)
+    async _request (fullRequestOptions, totalRetryCount = 0, retryCount = 0) {
+        log.info(`[${fullRequestOptions.method}] ${fullRequestOptions.url}`)
 
         if (fullRequestOptions.body && Object.keys(fullRequestOptions.body).length) {
             log.info('DATA', fullRequestOptions.body)
         }
 
-        return new Promise((resolve, reject) => request(fullRequestOptions, (err, response, body) => {
-            const error = err || getErrorFromResponseBody(body)
+        let response
+        try {
+            response = await axios(fullRequestOptions)
 
-            /**
-             * Resolve only if successful response
-             */
-            if (!err && isSuccessfulResponse(response.statusCode, body)) {
-                this.emit('response', { result: body })
-                return resolve(body)
+            if (isSuccessfulResponse(response.status, response.data)) {
+                this.emit('response', { result: response.data })
+
+                return response.data
             }
 
-            /**
-             *  stop retrying as this will never be successful.
-             *  we will handle this at the elementErrorHandler
-             */
+            return Promise.reject()
+        } catch (err) {
+            const error = err || getErrorFromResponseBody(response.data)
+
             if(error.name === 'stale element reference') {
                 log.warn('Request encountered a stale element - terminating request')
                 this.emit('response', { error })
-                return reject(error)
+                return error
             }
 
-            /**
-             * stop retrying if totalRetryCount was exceeded or there is no reason to
-             * retry, e.g. if sessionId is invalid
-             */
             if (retryCount >= totalRetryCount || error.message.includes('invalid session id')) {
                 log.error('Request failed due to', error)
                 this.emit('response', { error })
-                return reject(error)
+                return error
             }
 
             ++retryCount
             this.emit('retry', { error, retryCount })
             log.warn('Request failed due to', error.message)
             log.info(`Retrying ${retryCount}/${totalRetryCount}`)
-            this._request(fullRequestOptions, totalRetryCount, retryCount).then(resolve, reject)
-        }))
+            await this._request(fullRequestOptions, totalRetryCount, retryCount)
+        }
     }
 }
