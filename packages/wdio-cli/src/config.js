@@ -73,86 +73,87 @@ To run your tests, execute:
 $ wdio wdio.conf.js
 `
 
-export const CLI_PARAMS = [{
-    name: 'help',
-    description: 'prints WebdriverIO help menu'
-}, {
-    name: 'version',
-    description: 'prints WebdriverIO version'
-}, {
-    name: 'hostname',
-    alias: 'h',
-    describe: 'automation driver host address',
-    type: 'string'
-}, {
-    name: 'port',
-    alias: 'p',
-    describe: 'automation driver port',
-    type: 'number'
-}, {
-    name: 'user',
-    alias: 'u',
-    description: 'username if using a cloud service as automation backend',
-    type: 'string'
-}, {
-    name: 'key',
-    alias: 'k',
-    description: 'corresponding access key to the user',
-    type: 'string'
-}, {
-    name: 'watch',
-    description: 'watch specs for changes',
-    type: 'boolean'
-}, {
-    name: 'logLevel',
-    alias: 'l',
-    description: 'level of logging verbosity',
-    choices: LOG_LEVELS
-}, {
-    name: 'bail',
-    description: 'stop test runner after specific amount of tests have failed',
-    type: 'number'
-}, {
-    name: 'baseUrl',
-    description: 'shorten url command calls by setting a base url',
-    type: 'string'
-}, {
-    name: 'waitforTimeout',
-    alias: 'w',
-    description: 'timeout for all waitForXXX commands',
-    type: 'number'
-}, {
-    name: 'framework',
-    alias: 'f',
-    description: 'defines the framework (Mocha, Jasmine or Cucumber) to run the specs',
-    type: 'string'
-}, {
-    name: 'reporters',
-    alias: 'r',
-    description: 'reporters to print out the results on stdout',
-    type: 'array'
-}, {
-    name: 'suite',
-    description: 'overwrites the specs attribute and runs the defined suite',
-    type: 'array'
-}, {
-    name: 'spec',
-    description: 'run only a certain spec file - overrides specs piped from stdin',
-    type: 'array'
-}, {
-    name: 'exclude',
-    description: 'exclude certain spec file from the test run - overrides exclude piped from stdin',
-    type: 'array'
-}, {
-    name: 'mochaOpts',
-    description: 'Mocha options'
-}, {
-    name: 'jasmineOpts',
-    description: 'Jasmine options'
-}, {
-    name: 'cucumberOpts',
-    description: 'Cucumber options'
-}]
+export const CLI_PARAMS = {
+    help: {
+        description: 'prints WebdriverIO help menu'
+    },
+    version: {
+        description: 'prints WebdriverIO version'
+    },
+    hostname: {
+        alias: 'h',
+        describe: 'automation driver host address',
+        type: 'string'
+    },
+    port: {
+        alias: 'p',
+        describe: 'automation driver port',
+        type: 'number'
+    },
+    user: {
+        alias: 'u',
+        description: 'username if using a cloud service as automation backend',
+        type: 'string'
+    },
+    key: {
+        alias: 'k',
+        description: 'corresponding access key to the user',
+        type: 'string'
+    },
+    watch: {
+        description: 'watch specs for changes',
+        type: 'boolean'
+    },
+    logLevel: {
+        alias: 'l',
+        description: 'level of logging verbosity',
+        choices: LOG_LEVELS
+    },
+    bail: {
+        description: 'stop test runner after specific amount of tests have failed',
+        type: 'number'
+    },
+    baseUrl: {
+        description: 'shorten url command calls by setting a base url',
+        type: 'string'
+    },
+    waitforTimeout: {
+        alias: 'w',
+        description: 'timeout for all waitForXXX commands',
+        type: 'number'
+    },
+    framework: {
+        alias: 'f',
+        description: 'defines the framework (Mocha, Jasmine or Cucumber) to run the specs',
+        type: 'string'
+    },
+    reporters: {
+        alias: 'r',
+        description: 'reporters to print out the results on stdout',
+        type: 'array'
+    },
+    suite: {
+        description: 'overwrites the specs attribute and runs the defined suite',
+        type: 'array'
+    },
+    spec: {
+        description: 'run only a certain spec file - overrides specs piped from stdin',
+        type: 'array'
+    },
+    exclude: {
+        description: 'exclude certain spec file from the test run - overrides exclude piped from stdin',
+        type: 'array'
+    },
+    mochaOpts: {
+        description: 'Mocha options'
+    },
+    jasmineOpts: {
+        description: 'Jasmine options'
+    },
+    cucumberOpts: {
+        description: 'Cucumber options'
+    }
+}
 
 export const QUESTIONNAIRE = [{
     type: 'list',
