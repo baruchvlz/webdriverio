@@ -20,5 +20,9 @@
 import { shadowFnFactory } from '../../scripts/shadowFnFactory'
 
 export default async function shadowRoot (selector) {
+    if (this.isReactElement) {
+        throw new Error('Shadow root selector cannot be used with element selected via React commands')
+    }
+
     return await this.$$(shadowFnFactory(selector, true))
 }
