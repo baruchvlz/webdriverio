@@ -1,6 +1,8 @@
 import DevTools from '../packages/devtools/src/index'
 import { ELEMENT_KEY } from '../packages/devtools/src/constants'
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
 let browser
 
 beforeAll(async () => {
@@ -186,6 +188,21 @@ describe('window handling', () => {
         expect(handles).toEqual([handle])
     })
 
+    it('should switch to window created by DOM interaction', async () => {
+        const newWindowLink = await browser.findElement('css selector', '#newWindow')
+        await browser.elementClick(newWindowLink[ELEMENT_KEY])
+        await sleep(500)
+        expect(await browser.getWindowHandles()).toHaveLength(2)
+
+        const handles = await browser.getWindowHandles()
+        await browser.switchToWindow(handles[1])
+        expect(await browser.getTitle()).toBe('two')
+
+        await browser.closeWindow()
+        expect(await browser.getTitle()).toBe('WebdriverJS Testpage')
+        expect(await browser.getWindowHandles()).toHaveLength(1)
+    })
+
     it('createWindow', async () => {
         expect(await browser.getTitle()).toBe('WebdriverJS Testpage')
 
@@ -227,6 +244,10 @@ describe('frames', () => {
 
         expect(await getDocumentText())
             .toContain('Your content goes here.')
+
+        const body = await browser.findElement('css selector', 'body')
+        expect(await browser.getElementAttribute(body[ELEMENT_KEY], 'id')).toBe('tinymce')
+        await browser.elementClick(body[ELEMENT_KEY])
     })
 
     it('parentFrame', async () => {
