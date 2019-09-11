@@ -13,7 +13,7 @@ const log = logger('@wdio/sync')
  * @return {Promise}  promise that gets resolved once all hooks finished running
  */
 /* istanbul ignore next */
-export default function executeHooksWithArgs (hooks = [], args) {
+export default function executeHooksWithArgs (hooks, args) {
     /**
      * make sure hooks are an array of functions
      */
