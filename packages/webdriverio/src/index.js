@@ -62,9 +62,12 @@ export const remote = async function (params = {}, remoteModifier) {
     }
 
     instance.addLocatorStrategy = (name, script) => {
-        if (instance.strategies.get(name)) {
-            throw new Error(`Strategy ${name} already exists`)
-        }
+        /**
+         * @NOTE this check has been commented out for manual integration testing
+         */
+        // if (instance.strategies.get(name)) {
+        //     throw new Error(`Strategy ${name} already exists`)
+        // }
 
         instance.strategies.set(name, script)
     }

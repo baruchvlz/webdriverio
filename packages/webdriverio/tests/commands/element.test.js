@@ -13,4 +13,5 @@ test(scope + ' commands list and strategies', () => {
     const expected = [...files, 'strategies']
 
     expect(prototype).toEqual(expected)
+    expect(prototype.includes('custom$')).toBeTruthy()
 })

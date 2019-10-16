@@ -1,6 +1,7 @@
 export const $$ = require('./browser/$$').default
 export const $ = require('./browser/$').default
 export const call = require('./browser/call').default
+export const custom$$ = require('./browser/custom$$').default
 export const custom$ = require('./browser/custom$').default
 export const debug = require('./browser/debug').default
 export const deleteCookies = require('./browser/deleteCookies').default
@@ -22,5 +23,6 @@ export const setWindowSize = require('./browser/setWindowSize').default
 export const switchWindow = require('./browser/switchWindow').default
 export const touchAction = require('./browser/touchAction').default
 export const uploadFile = require('./browser/uploadFile').default
+export const useLocatorStrategy = require('./browser/useLocatorStrategy').default
 export const url = require('./browser/url').default
 export const waitUntil = require('./browser/waitUntil').default

@@ -13,9 +13,9 @@ async function custom$ (strategyName, strategyArgument) {
     let parent
 
     if (this.elementId) {
-        switch(this.parent.constructor.name) {
+        switch(this.constructor.name) {
         case 'Element':
-            parent = this.parent
+            parent = this
             break
         case 'Browser':
         default:
